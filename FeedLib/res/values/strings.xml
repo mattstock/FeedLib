@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UBSSW Connect</string>
+    <string name="app_title">University at Buffalo Social Work Reader</string>
+    <string name="app_description">News from the University at Buffalo School of Social Work</string>
+    <string name="email">sw-info@buffalo.edu</string>
+    <string name="website">http://www.socialwork.buffalo.edu/</string>
+	<string name="contact">Matt Stock</string>
+    <string name="menu_settings">Settings</string>
+    <string name="feed_menu_title">Feeds</string>
+    <string name="web_view">View</string>
+    <string name="loading">Loading Content</string>
+    <string name="authority">com.bexkat.feedlib.contentprovider</string>
+    <string name="about">Developed on behalf of the University at Buffalo School of Social Work (<a>http://www.socialwork.buffalo.edu/</a>).\nDeveloped by Bexkat Systems LLC (<a>http://www.bexkat.com/</a>).</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<opml version="1.0">
+    <head>
+        <title>Your Subscriptions</title>
+    </head>
+    <body>
+		<outline text="General UB School of Social Work Announcements" title="UB SSW Announcements" htmlUrl="http://www.socialwork.buffalo.edu/" xmlUrl="http://www.socialwork.buffalo.edu/feeds/spotlights_rss.asp" type="rss"/>
+		<outline text="UB School of Social work events" title="UB SSW Events" htmlUrl="http://www.socialwork.buffalo.edu/" xmlUrl="http://www.socialwork.buffalo.edu/feeds/events_rss.asp" type="rss"/>
+		<outline text="Living Proof UB School of Social Work podcast of relevant and interesting material" title="Living Proof" htmlUrl="http://www.socialwork.buffalo.edu/" xmlUrl="http://www.socialwork.buffalo.edu/podcast/living_proof.xml" type="rss"/>
+    </body>
+</opml>
