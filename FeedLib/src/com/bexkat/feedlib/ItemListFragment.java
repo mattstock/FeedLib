@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -38,14 +37,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.ShareActionProvider;
 import com.bexkat.feedlib.db.DatabaseHelper;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
@@ -55,14 +58,14 @@ import com.bexkat.feedlib.db.ItemTable;
 public class ItemListFragment extends SherlockListFragment implements
 		LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String TAG = "ItemListFragment";
-	private static final int MENU_REFRESH = 0;
-	private static final int MENU_READ = 1;
-	private static final int MENU_ABOUT = 2;
 	private SimpleCursorAdapter mCursorAdapter;
 	private SimpleDateFormat mFormat = new SimpleDateFormat(
 			"EEEE, MMMM d, yyyy");
 	private long mFeedId;
 	private String mTitle;
+	private ActionMode mActionMode;
+	private String selectedTitle;
+	private Uri selectedUri;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -96,6 +99,30 @@ public class ItemListFragment extends SherlockListFragment implements
 		int[] to = new int[] { R.id.row_title, R.id.row_pubdate, R.id.row_read };
 
 		super.onActivityCreated(saveInstanceState);
+
+		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (mActionMode != null) {
+					return false;
+				}
+				ItemTable db = new ItemTable(getSherlockActivity());
+				Item item = db.getItem(id);
+				selectedTitle = item.getTitle();
+				try {
+					selectedUri = Uri.parse(item.getLink().toURI().toString());
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+				// Start the CAB using the ActionMode.Callback defined above
+				mActionMode = getSherlockActivity().startActionMode(
+						mActionModeCallback);
+				view.setSelected(true);
+				return true;
+			}
+		});
 
 		mCursorAdapter = new SimpleCursorAdapter(getActivity(),
 				R.layout.item_list, null, from, to,
@@ -134,7 +161,7 @@ public class ItemListFragment extends SherlockListFragment implements
 		Intent intent = null;
 
 		Log.d(TAG, "Item click: " + id);
-		ItemTable db = new ItemTable(getActivity());
+		ItemTable db = new ItemTable(getSherlockActivity());
 		Item item = db.getItem(id);
 
 		// Mark as read
@@ -152,17 +179,50 @@ public class ItemListFragment extends SherlockListFragment implements
 				e.printStackTrace();
 			}
 		} else {
-			intent = new Intent(getActivity(), ItemDetailActivity.class);
+			intent = new Intent(getSherlockActivity(), ItemDetailActivity.class);
 			intent.putExtra(ItemTable._ID, id);
 		}
 
 		startActivity(intent);
 	}
 
+	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			// Inflate a menu resource providing context menu items
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.menu_item_detail, menu);
+			MenuItem actionItem = menu.findItem(R.id.menu_item_share);
+			ShareActionProvider actionProvider = (ShareActionProvider) actionItem
+					.getActionProvider();
+			actionProvider
+					.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
+			getListAdapter();
+			actionProvider.setShareIntent(ItemDetailFragment.createShareIntent(
+					selectedTitle, selectedUri));
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			mode.finish();
+			return false;
+		}
+
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mActionMode = null;
+		}
+	};
+
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		menu.add(Menu.NONE, MENU_REFRESH, 1, "Refresh").setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-		menu.add(Menu.NONE, MENU_READ, 2, "Mark all as Read");
+		inflater.inflate(R.menu.itemlist, menu);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -172,13 +232,13 @@ public class ItemListFragment extends SherlockListFragment implements
 
 		Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ", " + mFeedId);
 
-		switch (item.getItemId()) {
-		case MENU_REFRESH:
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_item_refresh) {
 			ArrayList<Feed> array = new ArrayList<Feed>();
 			array.add(f);
 			new UpdateFeeds(getSherlockActivity()).execute(array);
 			return true;
-		case MENU_READ:
+		} else if (itemId == R.id.menu_item_read) {
 			ft.markAllAsRead(mFeedId);
 			return true;
 		}
@@ -206,5 +266,10 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
 		mCursorAdapter.swapCursor(null);
+	}
+
+	private void shareCurrentItem() {
+		// TODO Auto-generated method stub
+
 	}
 }

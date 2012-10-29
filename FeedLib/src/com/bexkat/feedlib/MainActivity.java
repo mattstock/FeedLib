@@ -37,13 +37,13 @@ import android.content.Context;
 
 public class MainActivity extends SherlockFragmentActivity {
 	private static final String TAG = "MainActivity";
-	private static final int MENU_ABOUT = 2;
 	private FeedPagerAdapter mAdapter;
 	private ViewPager mPager;
 	private Context mCtx;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		setTheme(R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
