@@ -12,7 +12,7 @@
     <string name="refresh">Refresh</string>
     <string name="web_view">View</string>
     <string name="read">Mark all as read</string>
-    <string name="loading">Loading Content</string>
+    <string name="loading">No Articles Available</string>
     <string name="share_subject">An article you should look at</string>
     <string name="authority">com.bexkat.feedlib.contentprovider</string>
     <string name="about">Developed on behalf of the University at Buffalo School of Social Work (<a>http://www.socialwork.buffalo.edu/</a>).\nDeveloped by Bexkat Systems LLC (<a>http://www.bexkat.com/</a>).</string>
