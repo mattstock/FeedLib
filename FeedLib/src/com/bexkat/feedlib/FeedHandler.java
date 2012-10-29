@@ -53,6 +53,7 @@ import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
+import android.util.Log;
 
 
 /**
@@ -76,7 +77,7 @@ public class FeedHandler extends DefaultHandler {
 	//						    		  yyyy-MM-dd'T'HH:mm:ssz
 	//			Google Reader Shared Items Atom Date Format: yyyy-MM-dd'T'HH:mm:ss'Z'
 	//			Android Developers Blog Atom Date Format: yyyy-MM-dd'T'HH:mm:ss.SSSZ
-	private static final String DATE_FORMATS[] = {"EEE, dd MMM yyyy HH:mm:ss Z","EEE, dd MMM yyyy HH:mm:ss z","yyyy-MM-dd'T'HH:mm:ssz","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss'Z'","yyyy-MM-dd'T'HH:mm:ss.SSSZ"};
+	private static final String DATE_FORMATS[] = {"EEE, dd MMM yyyy HH:mm:ss Z","EEE, MMM dd yyyy HH:mm:ss z", "EEE, dd MMM yyyy HH:mm:ss z","yyyy-MM-dd'T'HH:mm:ssz","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss'Z'","yyyy-MM-dd'T'HH:mm:ss.SSSZ","yyyy-MM-dd'T'HH:mm:ss"};
 	private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 	
 	//Allowed Namespaces
@@ -221,7 +222,11 @@ public class FeedHandler extends DefaultHandler {
 						else
 							mItem.setLink(new URL(mSb.toString().trim()));
 					} catch(MalformedURLException mue) {
-						throw new SAXException(mue);
+						try {
+							mItem.setLink(new URL("http://"));
+						} catch (MalformedURLException e) {
+							throw new SAXException(mue);
+						}
 					}
 				} else if (isFeed && mFeed.getHomePage() == null) {
 					try {
@@ -244,7 +249,8 @@ public class FeedHandler extends DefaultHandler {
 							break;
 						} catch (ParseException pe) {
 							if (i == DATE_FORMATS.length-1) {
-								throw new SAXException(pe);
+								// TODO No date?
+								// throw new SAXException(pe);
 							}	
 						}
 			        }

@@ -37,7 +37,7 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 	private static final String TAG = "DatabaseHelper";
 	private static final String DATABASE_NAME = "dbfeed";
-	private static final int DATABASE_VERSION = 10;
+	private static final int DATABASE_VERSION = 14;
 	public static final String SORT_ASC = " ASC";
 	public static final String SORT_DESC = " DESC";
 	public static final String[] ORDERS = { SORT_ASC, SORT_DESC };

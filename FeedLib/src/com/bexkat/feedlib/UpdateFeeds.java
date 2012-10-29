@@ -48,6 +48,7 @@ public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Void, Boolean> {
 			FeedHandler feedHandler = new FeedHandler(activity);
 
 			try {
+				Log.d(TAG, "Updating " + feed.getTitle());
 				Feed handledFeed = feedHandler.handleFeed(feed.getURL());
 
 				handledFeed.setId(feedId);
