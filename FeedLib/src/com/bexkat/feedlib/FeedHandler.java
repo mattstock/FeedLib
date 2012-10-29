@@ -120,7 +120,6 @@ public class FeedHandler extends DefaultHandler {
 
 	public void endDocument() throws SAXException {
 		Date now = new Date();
-		//Date now = Calendar.getInstance().getTime();
 		mFeed.setRefresh(now);
 	}
 	
@@ -231,9 +230,15 @@ public class FeedHandler extends DefaultHandler {
 				} else if (isFeed && mFeed.getHomePage() == null) {
 					try {
 						if (mSb != null && mSb.toString() != "") // RSS
-							mFeed.setHomePage(new URL(mSb.toString().trim()));
+							if (mSb.toString().startsWith("http"))
+								mFeed.setHomePage(new URL(mSb.toString().trim()));
+							else
+								mFeed.setHomePage(new URL("http://" + mSb.toString().trim()));
 						else if (mMimeAttribute == "text/html") //Atom
-							mFeed.setHomePage(new URL(mHrefAttribute));
+							if (mHrefAttribute.startsWith("http"))
+								mFeed.setHomePage(new URL(mHrefAttribute));
+							else
+								mFeed.setHomePage(new URL("http://" + mHrefAttribute));
 					} catch(MalformedURLException mue) {
 						throw new SAXException(mue);
 					}
