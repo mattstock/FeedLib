@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -31,6 +32,7 @@ import com.bexkat.feedlib.db.Item;
 import com.bexkat.feedlib.db.ItemTable;
 
 public class ItemDetailActivity extends SherlockFragmentActivity {
+	private static final String TAG = "ItemDetailActivity";
 	ItemTable mItemTable;
 	long mItemId;
 
@@ -39,9 +41,12 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 		setTheme(R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
 
-		Fragment f = new ItemDetailFragment();
-		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-		ft.add(android.R.id.content, f).commit();
+		if (savedInstanceState == null) {
+			Fragment f = new ItemDetailFragment();
+			FragmentTransaction ft = getSupportFragmentManager()
+					.beginTransaction();
+			ft.add(android.R.id.content, f).commit();
+		}
 
 		// Pull up the item to display
 		Intent intent = getIntent();
@@ -67,6 +72,20 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 			e.printStackTrace();
 		}
 		((ItemDetailFragment) f).updateState(b);
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle inState) {
+		Log.d(TAG, "Loading item state");
+		super.onRestoreInstanceState(inState);
+		mItemId = inState.getLong("id");
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		Log.d(TAG, "Saving item state");
+		outState.putLong("id", mItemId);
+		super.onSaveInstanceState(outState);
 	}
 
 	public void onClick(View v) {
