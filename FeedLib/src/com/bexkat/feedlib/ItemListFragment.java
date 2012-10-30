@@ -62,7 +62,6 @@ public class ItemListFragment extends SherlockListFragment implements
 	private SimpleDateFormat mFormat = new SimpleDateFormat(
 			"EEEE, MMMM d, yyyy");
 	private long mFeedId;
-	private String mTitle;
 	private ActionMode mActionMode;
 	private String selectedTitle;
 	private Uri selectedUri;
@@ -73,13 +72,10 @@ public class ItemListFragment extends SherlockListFragment implements
 		setHasOptionsMenu(true);
 
 		Bundle b = getArguments();
-		if (b != null) {
+		if (b != null)
 			mFeedId = getArguments().getLong("feedId");
-			mTitle = getArguments().getString("title");
-		} else {
+		else
 			mFeedId = 1;
-			mTitle = "None";
-		}
 	}
 
 	@Override
@@ -87,8 +83,6 @@ public class ItemListFragment extends SherlockListFragment implements
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_pager_list, container,
 				false);
-		TextView tv = (TextView) v.findViewById(R.id.channel_name);
-		tv.setText(mTitle);
 		return v;
 	}
 
@@ -266,10 +260,5 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
 		mCursorAdapter.swapCursor(null);
-	}
-
-	private void shareCurrentItem() {
-		// TODO Auto-generated method stub
-
 	}
 }
