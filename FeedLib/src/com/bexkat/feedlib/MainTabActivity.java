@@ -26,8 +26,8 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		setTheme(R.style.Theme_Sherlock);
 		super.onCreate(savedInstanceState);
+		setTheme(R.style.Theme_Sherlock);
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 

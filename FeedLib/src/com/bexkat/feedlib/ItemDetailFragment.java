@@ -1,10 +1,8 @@
 package com.bexkat.feedlib;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,30 +16,40 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.ShareActionProvider;
 
 public class ItemDetailFragment extends SherlockFragment {
-	Activity mActivity;
 	Uri uri;
 	String title;
-	
+
 	private static final String TAG = "ItemDetailFragment";
+
+	public static ItemDetailFragment newInstance(Bundle b) {
+		ItemDetailFragment f = new ItemDetailFragment();
+
+		f.setArguments(b);
+		return f;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
 	}
-	
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		mActivity = activity;
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.item_detail, container,
-				false);
-		return v;
+		super.onCreateView(inflater, container, savedInstanceState);
+		View view = inflater.inflate(R.layout.item_detail, container, false);
+
+		Bundle b = getArguments();
+		TextView tv = (TextView) view.findViewById(R.id.item_content);
+		tv.setText(b.getString("content"));
+		tv = (TextView) view.findViewById(R.id.item_pubdate);
+		tv.setText(b.getString("pubDate"));
+		tv = (TextView) view.findViewById(R.id.item_title);
+		tv.setText(b.getString("title"));
+		title = b.getString("title");
+		uri = Uri.parse(b.getString("uri"));
+		return view;
 	}
 
 	@Override
@@ -55,28 +63,20 @@ public class ItemDetailFragment extends SherlockFragment {
 		actionProvider.setShareIntent(createShareIntent(title, uri));
 	}
 
+	public void onClick(View v) {
+		if (v.getId() == R.id.web_view) {
+			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			startActivity(intent);
+		}
+	}
+
 	static public Intent createShareIntent(String title, Uri uri) {
 		Intent shareIntent = new Intent(Intent.ACTION_SEND);
 
 		shareIntent.setType("text/plain");
-		shareIntent
-				.putExtra(Intent.EXTRA_SUBJECT, R.string.share_subject);
-		shareIntent.putExtra(Intent.EXTRA_TEXT, "Article on " + title + ": " + uri.toString());
+		shareIntent.putExtra(Intent.EXTRA_SUBJECT, R.string.share_subject);
+		shareIntent.putExtra(Intent.EXTRA_TEXT, "Article on " + title + ": "
+				+ uri.toString());
 		return shareIntent;
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		return false;
-	}
-
-	public void updateState(Bundle b) {
-		TextView tv = (TextView) mActivity.findViewById(R.id.item_content);
-		tv.setText(b.getString("content"));
-		tv = (TextView) mActivity.findViewById(R.id.item_pubdate);
-		tv.setText(b.getString("pubDate"));
-		tv = (TextView) mActivity.findViewById(R.id.item_title);
-		tv.setText(b.getString("title"));
-		title = b.getString("title");
-		uri = Uri.parse(b.getString("URI"));
 	}
 }
