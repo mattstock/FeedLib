@@ -48,7 +48,7 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		final ActionBar actionBar = getSupportActionBar();
 
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-		
+
 		MyTabListener tabListener = new MyTabListener();
 
 		FeedTable ft = new FeedTable(this);
@@ -71,8 +71,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ABOUT, Menu.CATEGORY_SECONDARY, "About");
-
+		menu.add(Menu.NONE, MENU_ABOUT, Menu.CATEGORY_SECONDARY, "About")
+				.setIcon(R.drawable.ic_menu_info_details)
+				.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -145,8 +146,6 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			Feed feed = (Feed) tab.getTag();
 			Log.d(TAG,
 					"onTabReselected(" + tab.getText() + "): " + feed.getId());
-			// TODO Auto-generated method stub
-
 		}
 
 	}
