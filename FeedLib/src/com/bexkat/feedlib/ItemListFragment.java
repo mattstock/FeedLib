@@ -137,8 +137,6 @@ public class ItemListFragment extends SherlockListFragment implements
 					ImageView iv = (ImageView) v;
 					if (c.getInt(index) == DatabaseHelper.ON)
 						iv.setImageResource(R.drawable.ic_favorite);
-
-					Log.d(TAG, "read is " + c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) + " and fav is " + c.getInt(index));
 					if (c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) == DatabaseHelper.ON &&
 							c.getInt(index) == DatabaseHelper.OFF)
 						iv.setVisibility(View.INVISIBLE);
@@ -213,7 +211,6 @@ public class ItemListFragment extends SherlockListFragment implements
 			ItemTable table = new ItemTable(getSherlockActivity());
 			if (item.getItemId() == R.id.menu_item_favorite) {
 				ContentValues values = new ContentValues();
-				Log.d(TAG, "fav is " + selectedItem.isFavorite());
 				values.put(ItemTable.COLUMN_FAVORITE,
 						(selectedItem.isFavorite() ? DatabaseHelper.OFF
 								: DatabaseHelper.ON));

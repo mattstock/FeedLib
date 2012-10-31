@@ -25,6 +25,7 @@ public class ItemDetailFragment extends SherlockFragment {
 	String title;
 	long id;
 	boolean fav;
+	ImageView favIcon;
 	
 	private static final String TAG = "ItemDetailFragment";
 
@@ -58,9 +59,9 @@ public class ItemDetailFragment extends SherlockFragment {
 		title = b.getString("title");
 		uri = Uri.parse(b.getString("uri"));
 		id = b.getLong("id");
-		ImageView ico = (ImageView) view.findViewById(R.id.status);
-		ico.setImageResource(R.drawable.ic_favorite);
-		ico.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
+		favIcon = (ImageView) view.findViewById(R.id.status);
+		Log.d(TAG, "changing visibility - " + fav);
+		favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
 		return view;
 	}
 
@@ -78,13 +79,14 @@ public class ItemDetailFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		ItemTable table = new ItemTable(getSherlockActivity());
 		if (item.getItemId() == R.id.menu_item_favorite) {
-			Log.d(TAG, "toggle favorite: " + id);
+			Log.d(TAG, "toggle favorite: " + id + " - " + fav);
+			fav = !fav;
+			favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
 			ContentValues values = new ContentValues();
 			values.put(ItemTable.COLUMN_FAVORITE,
-					(fav ? DatabaseHelper.OFF
-							: DatabaseHelper.ON));
+					(fav ? DatabaseHelper.ON
+							: DatabaseHelper.OFF));
 			table.updateItem(id, values);
-			// TODO - need to manually change 
 			return true;
 		}		
 		return false;

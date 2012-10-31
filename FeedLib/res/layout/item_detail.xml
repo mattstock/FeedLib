@@ -29,6 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:scaleType="center"
+        android:contentDescription="@string/favorite"
+        android:src="@drawable/ic_favorite"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true" />
 

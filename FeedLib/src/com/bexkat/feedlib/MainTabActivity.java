@@ -98,7 +98,6 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		Log.d(TAG, "Saving tab state");
 		outState.putInt("position", position);
 		super.onSaveInstanceState(outState);
 	}
