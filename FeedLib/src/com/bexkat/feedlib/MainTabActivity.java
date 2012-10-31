@@ -59,8 +59,12 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		MyTabListener tabListener = new MyTabListener();
 
 		FeedTable ft = new FeedTable(this);
+		Tab tab = actionBar.newTab();
+		tab.setText("Favorites");
+		tab.setTabListener(tabListener);
+		actionBar.addTab(tab);
 		for (Feed feed : ft.getEnabledFeeds()) {
-			Tab tab = actionBar.newTab();
+			tab = actionBar.newTab();
 			tab.setText(feed.getTitle());
 			tab.setTag(feed);
 			tab.setTabListener(tabListener);
@@ -107,6 +111,7 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		@Override
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {
 			Feed feed = (Feed) tab.getTag();
+
 			Log.d(TAG,
 					"onTabSelected(" + tab.getText() + "): "
 							+ tab.getPosition());
@@ -118,8 +123,13 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			if (f == null) {
 				Bundle args = new Bundle();
 				f = new ItemListFragment();
-				args.putLong("feedId", feed.getId());
-				args.putString("title", feed.getTitle());
+				if (feed == null) { // We want the favorites fragment
+					args.putLong("feedId", -1);
+					args.putString("title", "Favorites");
+				} else {
+					args.putLong("feedId", feed.getId());
+					args.putString("title", feed.getTitle());
+				}
 				f.setArguments(args);
 				// f.setRetainInstance(true);
 				ft.add(android.R.id.content, f, (String) tab.getText());

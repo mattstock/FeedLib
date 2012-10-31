@@ -63,7 +63,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	private SimpleCursorAdapter mCursorAdapter;
 	private SimpleDateFormat mFormat = new SimpleDateFormat(
 			"EEEE, MMMM d, yyyy");
-	private long mFeedId;
+	private long mFeedId = -1;
 	private ActionMode mActionMode;
 	private Item selectedItem;
 
@@ -90,7 +90,8 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onActivityCreated(Bundle saveInstanceState) {
 		String[] from = new String[] { ItemTable.COLUMN_TITLE,
-				ItemTable.COLUMN_PUBDATE, ItemTable.COLUMN_READ, ItemTable.COLUMN_FAVORITE };
+				ItemTable.COLUMN_PUBDATE, ItemTable.COLUMN_READ,
+				ItemTable.COLUMN_FAVORITE };
 		int[] to = new int[] { R.id.row_title, R.id.row_pubdate,
 				R.id.row_status, R.id.row_status };
 
@@ -137,11 +138,11 @@ public class ItemListFragment extends SherlockListFragment implements
 					ImageView iv = (ImageView) v;
 					if (c.getInt(index) == DatabaseHelper.ON)
 						iv.setImageResource(R.drawable.ic_favorite);
-					if (c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) == DatabaseHelper.ON &&
-							c.getInt(index) == DatabaseHelper.OFF)
+					if (c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) == DatabaseHelper.ON
+							&& c.getInt(index) == DatabaseHelper.OFF)
 						iv.setVisibility(View.INVISIBLE);
 					else
-						iv.setVisibility(View.VISIBLE);	
+						iv.setVisibility(View.VISIBLE);
 					return true;
 				}
 				return false;
@@ -197,7 +198,8 @@ public class ItemListFragment extends SherlockListFragment implements
 					.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
 			getListAdapter();
 			actionProvider.setShareIntent(ItemDetailFragment.createShareIntent(
-					selectedItem.getTitle(), Uri.parse(selectedItem.getLink().toString())));
+					selectedItem.getTitle(),
+					Uri.parse(selectedItem.getLink().toString())));
 			return true;
 		}
 
@@ -211,9 +213,8 @@ public class ItemListFragment extends SherlockListFragment implements
 			ItemTable table = new ItemTable(getSherlockActivity());
 			if (item.getItemId() == R.id.menu_item_favorite) {
 				ContentValues values = new ContentValues();
-				values.put(ItemTable.COLUMN_FAVORITE,
-						(selectedItem.isFavorite() ? DatabaseHelper.OFF
-								: DatabaseHelper.ON));
+				values.put(ItemTable.COLUMN_FAVORITE, (selectedItem
+						.isFavorite() ? DatabaseHelper.OFF : DatabaseHelper.ON));
 				table.updateItem(selectedItem.getId(), values);
 				mode.finish();
 				return true;
@@ -230,7 +231,11 @@ public class ItemListFragment extends SherlockListFragment implements
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.itemlist, menu);
+		Log.d(TAG, "options menu: " + mFeedId);
+		if (mFeedId != -1)
+			inflater.inflate(R.menu.itemlist, menu);
+		else
+			super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -258,11 +263,23 @@ public class ItemListFragment extends SherlockListFragment implements
 		String[] projection = new String[] { ItemTable._ID,
 				ItemTable.COLUMN_TITLE, ItemTable.COLUMN_PUBDATE,
 				ItemTable.COLUMN_READ, ItemTable.COLUMN_FAVORITE };
-		CursorLoader cursorLoader = new CursorLoader(getActivity(),
-				Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/"
-						+ mFeedId), projection, null, null,
-				ItemTable.COLUMN_READ + DatabaseHelper.SORT_ASC + ","
-						+ ItemTable.COLUMN_PUBDATE + DatabaseHelper.SORT_DESC);
+		CursorLoader cursorLoader;
+
+		if (mFeedId != -1)
+			cursorLoader = new CursorLoader(getActivity(),
+					Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/"
+							+ mFeedId), projection, null, null,
+					ItemTable.COLUMN_READ + DatabaseHelper.SORT_ASC + ","
+							+ ItemTable.COLUMN_PUBDATE
+							+ DatabaseHelper.SORT_DESC);
+		else
+			cursorLoader = new CursorLoader(getActivity(),
+					MyContentProvider.ITEM_CONTENT_URI, projection,
+					ItemTable.COLUMN_FAVORITE + "=?",
+					new String[] { Long.toString(DatabaseHelper.ON) },
+					ItemTable.COLUMN_READ + DatabaseHelper.SORT_ASC + ","
+							+ ItemTable.COLUMN_PUBDATE
+							+ DatabaseHelper.SORT_DESC);
 		return cursorLoader;
 	}
 
