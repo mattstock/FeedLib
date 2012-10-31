@@ -1,6 +1,9 @@
 package com.bexkat.feedlib;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -9,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.View;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
@@ -31,8 +35,11 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
-		if (savedInstanceState != null)
+		Log.d(TAG, "onCreate()");
+		if (savedInstanceState != null) {
 			position = savedInstanceState.getInt("position");
+			Log.d(TAG, "restoring state: " + position);
+		}
 
 		// Enable http cache if available
 		try {
@@ -60,12 +67,12 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			actionBar.addTab(tab);
 		}
 		actionBar.setSelectedNavigationItem(position);
+		selectInSpinnerIfPresent(position, false);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		getSupportActionBar().setSelectedNavigationItem(position);
 		checkFreshness();
 	}
 
@@ -90,13 +97,6 @@ public class MainTabActivity extends SherlockFragmentActivity {
 	}
 
 	@Override
-	public void onRestoreInstanceState(Bundle inState) {
-		Log.d(TAG, "Loading tab state");
-		super.onRestoreInstanceState(inState);
-		position = inState.getInt("position");
-	}
-
-	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		Log.d(TAG, "Saving tab state");
 		outState.putInt("position", position);
@@ -108,7 +108,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		@Override
 		public void onTabSelected(Tab tab, FragmentTransaction ft) {
 			Feed feed = (Feed) tab.getTag();
-			Log.d(TAG, "onTabSelected(" + tab.getText() + "): " + feed.getId());
+			Log.d(TAG,
+					"onTabSelected(" + tab.getText() + "): "
+							+ tab.getPosition());
 			Fragment f;
 			FragmentManager fm = getSupportFragmentManager();
 
@@ -130,9 +132,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 		@Override
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			Feed feed = (Feed) tab.getTag();
 			Log.d(TAG,
-					"onTabUnselected(" + tab.getText() + "): " + feed.getId());
+					"onTabUnselected(" + tab.getText() + "): "
+							+ tab.getPosition());
 			Fragment f;
 			FragmentManager fm = getSupportFragmentManager();
 			f = fm.findFragmentByTag((String) tab.getText());
@@ -143,9 +145,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
 		@Override
 		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-			Feed feed = (Feed) tab.getTag();
 			Log.d(TAG,
-					"onTabReselected(" + tab.getText() + "): " + feed.getId());
+					"onTabReselected(" + tab.getText() + "): "
+							+ tab.getPosition());
 		}
 
 	}
@@ -163,5 +165,68 @@ public class MainTabActivity extends SherlockFragmentActivity {
 				oldFeeds.add(feed);
 
 		new UpdateFeeds(this).execute(oldFeeds);
+	}
+
+	/**
+	 * Hack that takes advantage of interface parity between ActionBarSherlock
+	 * and the native interface to reach inside the classes to manually select
+	 * the appropriate tab spinner position if the overflow tab spinner is
+	 * showing.
+	 * 
+	 * Related issues:
+	 * https://github.com/JakeWharton/ActionBarSherlock/issues/240 and
+	 * https://android-review.googlesource.com/#/c/32492/
+	 * 
+	 * @author toulouse@crunchyroll.com
+	 */
+	private void selectInSpinnerIfPresent(int position, boolean animate) {
+		try {
+			View actionBarView = findViewById(R.id.abs__action_bar);
+			if (actionBarView == null) {
+				int id = getResources().getIdentifier("action_bar", "id",
+						"android");
+				actionBarView = findViewById(id);
+			}
+
+			Class<?> actionBarViewClass = actionBarView.getClass();
+			Field mTabScrollViewField = actionBarViewClass
+					.getDeclaredField("mTabScrollView");
+			mTabScrollViewField.setAccessible(true);
+
+			Object mTabScrollView = mTabScrollViewField.get(actionBarView);
+			if (mTabScrollView == null) {
+				return;
+			}
+
+			Field mTabSpinnerField = mTabScrollView.getClass()
+					.getDeclaredField("mTabSpinner");
+			mTabSpinnerField.setAccessible(true);
+
+			Object mTabSpinner = mTabSpinnerField.get(mTabScrollView);
+			if (mTabSpinner == null) {
+				return;
+			}
+
+			Method setSelectionMethod = mTabSpinner
+					.getClass()
+					.getSuperclass()
+					.getDeclaredMethod("setSelection", Integer.TYPE,
+							Boolean.TYPE);
+			setSelectionMethod.invoke(mTabSpinner, position, animate);
+
+			Method requestLayoutMethod = mTabSpinner.getClass().getSuperclass()
+					.getDeclaredMethod("requestLayout");
+			requestLayoutMethod.invoke(mTabSpinner);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -42,6 +42,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.ActionMode;
@@ -169,15 +170,16 @@ public class ItemListFragment extends SherlockListFragment implements
 			try {
 				intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item
 						.getLink().toURI().toString()));
+				startActivity(intent);
 			} catch (URISyntaxException e) {
-				e.printStackTrace();
+				Log.d(TAG, "URL fail: " + item.getLink().toString());
+				Toast.makeText(getActivity(), "Article can't be loaded", Toast.LENGTH_SHORT).show();
 			}
 		} else {
 			intent = new Intent(getSherlockActivity(), ItemDetailActivity.class);
 			intent.putExtra(ItemTable._ID, id);
+			startActivity(intent);
 		}
-
-		startActivity(intent);
 	}
 
 	private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
