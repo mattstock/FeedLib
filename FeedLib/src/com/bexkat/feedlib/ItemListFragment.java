@@ -39,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -127,8 +128,7 @@ public class ItemListFragment extends SherlockListFragment implements
 			@Override
 			public boolean setViewValue(View v, Cursor c, int index) {
 				if (index == c.getColumnIndex(ItemTable.COLUMN_READ)) {
-					ImageView iv;
-					iv = (ImageView) v;
+					ImageView iv = (ImageView) v;
 					if (c.getInt(index) == DatabaseHelper.ON)
 						iv.setVisibility(View.INVISIBLE);
 					else
@@ -138,9 +138,7 @@ public class ItemListFragment extends SherlockListFragment implements
 				if (index == c.getColumnIndex(ItemTable.COLUMN_PUBDATE)) {
 					String date = mFormat.format(new Date(Long.parseLong(c
 							.getString(index))));
-					TextView tv;
-					tv = (TextView) v;
-					tv.setText(date);
+					((TextView) v).setText(date);
 					return true;
 				}
 				return false;
@@ -155,7 +153,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = null;
 
-		Log.d(TAG, "Item click: " + id);
+		Log.d(TAG, "Item click for view (" + v.getId() +  "): " + id);
 		ItemTable db = new ItemTable(getSherlockActivity());
 		Item item = db.getItem(id);
 
@@ -206,6 +204,9 @@ public class ItemListFragment extends SherlockListFragment implements
 
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			if (item.getItemId() == R.id.menu_item_favorite) {
+				Log.d(TAG, "I have a favorite!");
+			}
 			mode.finish();
 			return false;
 		}
@@ -262,5 +263,5 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
 		mCursorAdapter.swapCursor(null);
-	}
+	}	
 }

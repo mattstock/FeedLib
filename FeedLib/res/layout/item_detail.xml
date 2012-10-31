@@ -5,32 +5,46 @@
 
     <TextView
         android:id="@+id/item_title"
-        android:layout_alignParentTop="true"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/star"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
         android:id="@+id/item_pubdate"
-        android:layout_below="@+id/item_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/star"
+        android:layout_below="@+id/item_title"
+        android:paddingBottom="20dp"
+        android:layout_alignParentLeft="true"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textStyle="italic" />
 
+    <CheckBox
+        android:id="@+id/star"
+        style="?android:attr/starStyle"
+        android:layout_margin="20dp"
+        android:onClick="onClick"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <ScrollView
         android:id="@+id/scrollView1"
-        android:layout_below="@+id/item_pubdate"
-        android:layout_above="@+id/web_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/web_view"
+        android:layout_below="@+id/item_pubdate">
 
         <TextView
             android:id="@+id/item_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-        
     </ScrollView>
 
     <Button

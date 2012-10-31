@@ -158,7 +158,9 @@ public class ItemTable implements BaseColumns {
 	public Item getFirstItem(long feedId) {
 		Item item = null;
 		Cursor cursor = mResolver.query(MyContentProvider.ITEM_CONTENT_URI,
-				null, ItemTable.COLUMN_FEED_ID + "=? ", new String[] { Long.toString(feedId) }, COLUMN_PUBDATE + DatabaseHelper.SORT_ASC);
+				null, ItemTable.COLUMN_FEED_ID + "=? ",
+				new String[] { Long.toString(feedId) }, COLUMN_PUBDATE
+						+ DatabaseHelper.SORT_ASC);
 
 		if (cursor != null && cursor.moveToFirst()) {
 			item = cursorToItem(cursor);
@@ -192,7 +194,9 @@ public class ItemTable implements BaseColumns {
 	public Item getLastItem(long feedId) {
 		Item item = null;
 		Cursor cursor = mResolver.query(MyContentProvider.ITEM_CONTENT_URI,
-				null, ItemTable.COLUMN_FEED_ID + "=? ", new String[] { Long.toString(feedId) }, COLUMN_PUBDATE + DatabaseHelper.SORT_DESC);
+				null, ItemTable.COLUMN_FEED_ID + "=? ",
+				new String[] { Long.toString(feedId) }, COLUMN_PUBDATE
+						+ DatabaseHelper.SORT_DESC);
 
 		if (cursor != null && cursor.moveToFirst()) {
 			item = cursorToItem(cursor);
@@ -210,15 +214,17 @@ public class ItemTable implements BaseColumns {
 	}
 
 	public void updateItem(long itemId, ContentValues values) {
-		mResolver.update(Uri.parse(MyContentProvider.ITEM_CONTENT_URI + "/" + itemId),
+		mResolver.update(
+				Uri.parse(MyContentProvider.ITEM_CONTENT_URI + "/" + itemId),
 				values, null, null);
 	}
-	
+
 	public void markAllAsRead(long feedId) {
 		ContentValues values = new ContentValues();
 		values.put(ItemTable.COLUMN_READ, DatabaseHelper.ON);
-		mResolver.update(MyContentProvider.ITEM_CONTENT_URI,
-				values, ItemTable.COLUMN_FEED_ID + "=? ", new String[] { Long.toString(feedId) });
+		mResolver.update(MyContentProvider.ITEM_CONTENT_URI, values,
+				ItemTable.COLUMN_FEED_ID + "=? ",
+				new String[] { Long.toString(feedId) });
 	}
 
 }

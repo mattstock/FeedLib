@@ -1,5 +1,6 @@
 package com.bexkat.feedlib;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -14,11 +16,14 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.ShareActionProvider;
+import com.bexkat.feedlib.db.DatabaseHelper;
+import com.bexkat.feedlib.db.ItemTable;
 
 public class ItemDetailFragment extends SherlockFragment {
 	Uri uri;
 	String title;
-
+	long id;
+	
 	private static final String TAG = "ItemDetailFragment";
 
 	public static ItemDetailFragment newInstance(Bundle b) {
@@ -47,8 +52,11 @@ public class ItemDetailFragment extends SherlockFragment {
 		tv.setText(b.getString("pubDate"));
 		tv = (TextView) view.findViewById(R.id.item_title);
 		tv.setText(b.getString("title"));
+		CheckBox cb = (CheckBox) view.findViewById(R.id.star);
+		cb.setChecked(b.getBoolean("fav"));
 		title = b.getString("title");
 		uri = Uri.parse(b.getString("uri"));
+		id = b.getLong("id");
 		return view;
 	}
 
@@ -67,6 +75,16 @@ public class ItemDetailFragment extends SherlockFragment {
 		if (v.getId() == R.id.web_view) {
 			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 			startActivity(intent);
+		}
+		if (v.getId() == R.id.star) {
+			CheckBox cb = (CheckBox) v;
+			ItemTable db = new ItemTable(getSherlockActivity());
+
+			// Change favorite state
+			Log.d(TAG, "Updating favorite on " + id);
+			ContentValues values = new ContentValues();
+			values.put(ItemTable.COLUMN_FAVORITE, (cb.isChecked() ? DatabaseHelper.ON : DatabaseHelper.OFF));
+			db.updateItem(id, values);
 		}
 	}
 

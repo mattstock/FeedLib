@@ -49,6 +49,8 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 		b.putString("title", item.getTitle());
 		b.putString("pubDate", item.getPubdate().toString());
 		b.putString("content", item.getContent());
+		b.putBoolean("fav", item.isFavorite());
+		b.putLong("id", id);
 		try {
 			b.putString("uri", item.getLink().toURI().toString());
 		} catch (URISyntaxException e) {

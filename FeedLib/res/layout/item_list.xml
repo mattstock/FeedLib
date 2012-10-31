@@ -6,11 +6,11 @@
 
     <ImageView
         android:id="@+id/row_read"
-        android:src="@drawable/unread"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:scaleType="center" />
+        android:scaleType="center"
+        android:src="@drawable/unread" />
 
     <LinearLayout
         android:layout_width="wrap_content"

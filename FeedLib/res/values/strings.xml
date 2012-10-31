@@ -11,6 +11,7 @@
     <string name="share">Share</string>
     <string name="refresh">Refresh</string>
     <string name="web_view">View</string>
+    <string name="favorite">Favorite</string>
     <string name="read">Mark all as read</string>
     <string name="loading">No Articles Available</string>
     <string name="share_subject">An article you should look at</string>
