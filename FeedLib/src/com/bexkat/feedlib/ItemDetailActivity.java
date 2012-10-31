@@ -27,11 +27,14 @@ import android.util.Log;
 import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bexkat.feedlib.db.Item;
 import com.bexkat.feedlib.db.ItemTable;
 
 public class ItemDetailActivity extends SherlockFragmentActivity {
 	private static final String TAG = "ItemDetailActivity";
+	private static final int MENU_ABOUT = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,26 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 					.beginTransaction();
 			ft.add(android.R.id.content, f).commit();
 		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(Menu.NONE, MENU_ABOUT, Menu.CATEGORY_SECONDARY, "About")
+				.setIcon(R.drawable.ic_menu_info_details)
+				.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case MENU_ABOUT:
+			FragmentTransaction ft = getSupportFragmentManager()
+					.beginTransaction();
+			AboutFragment af = new AboutFragment();
+			af.show(ft, "about");
+			return true;
+		}
+		return false;
 	}
 
 	public void onClick(View v) {

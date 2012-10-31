@@ -65,8 +65,7 @@ public class ItemListFragment extends SherlockListFragment implements
 			"EEEE, MMMM d, yyyy");
 	private long mFeedId;
 	private ActionMode mActionMode;
-	private String selectedTitle;
-	private Uri selectedUri;
+	private Item selectedItem;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,8 +90,9 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onActivityCreated(Bundle saveInstanceState) {
 		String[] from = new String[] { ItemTable.COLUMN_TITLE,
-				ItemTable.COLUMN_PUBDATE, ItemTable.COLUMN_READ };
-		int[] to = new int[] { R.id.row_title, R.id.row_pubdate, R.id.row_read };
+				ItemTable.COLUMN_PUBDATE, ItemTable.COLUMN_READ, ItemTable.COLUMN_FAVORITE };
+		int[] to = new int[] { R.id.row_title, R.id.row_pubdate,
+				R.id.row_status, R.id.row_status };
 
 		super.onActivityCreated(saveInstanceState);
 
@@ -105,13 +105,7 @@ public class ItemListFragment extends SherlockListFragment implements
 					return false;
 				}
 				ItemTable db = new ItemTable(getSherlockActivity());
-				Item item = db.getItem(id);
-				selectedTitle = item.getTitle();
-				try {
-					selectedUri = Uri.parse(item.getLink().toURI().toString());
-				} catch (URISyntaxException e) {
-					e.printStackTrace();
-				}
+				selectedItem = db.getItem(id);
 				// Start the CAB using the ActionMode.Callback defined above
 				mActionMode = getSherlockActivity().startActionMode(
 						mActionModeCallback);
@@ -129,16 +123,27 @@ public class ItemListFragment extends SherlockListFragment implements
 			public boolean setViewValue(View v, Cursor c, int index) {
 				if (index == c.getColumnIndex(ItemTable.COLUMN_READ)) {
 					ImageView iv = (ImageView) v;
-					if (c.getInt(index) == DatabaseHelper.ON)
-						iv.setVisibility(View.INVISIBLE);
-					else
-						iv.setVisibility(View.VISIBLE);
+					if (c.getInt(index) == DatabaseHelper.OFF)
+						iv.setImageResource(R.drawable.unread);
 					return true;
 				}
 				if (index == c.getColumnIndex(ItemTable.COLUMN_PUBDATE)) {
 					String date = mFormat.format(new Date(Long.parseLong(c
 							.getString(index))));
 					((TextView) v).setText(date);
+					return true;
+				}
+				if (index == c.getColumnIndex(ItemTable.COLUMN_FAVORITE)) {
+					ImageView iv = (ImageView) v;
+					if (c.getInt(index) == DatabaseHelper.ON)
+						iv.setImageResource(R.drawable.ic_favorite);
+
+					Log.d(TAG, "read is " + c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) + " and fav is " + c.getInt(index));
+					if (c.getInt(c.getColumnIndex(ItemTable.COLUMN_READ)) == DatabaseHelper.ON &&
+							c.getInt(index) == DatabaseHelper.OFF)
+						iv.setVisibility(View.INVISIBLE);
+					else
+						iv.setVisibility(View.VISIBLE);	
 					return true;
 				}
 				return false;
@@ -153,7 +158,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = null;
 
-		Log.d(TAG, "Item click for view (" + v.getId() +  "): " + id);
+		Log.d(TAG, "Item click for view (" + v.getId() + "): " + id);
 		ItemTable db = new ItemTable(getSherlockActivity());
 		Item item = db.getItem(id);
 
@@ -171,7 +176,8 @@ public class ItemListFragment extends SherlockListFragment implements
 				startActivity(intent);
 			} catch (URISyntaxException e) {
 				Log.d(TAG, "URL fail: " + item.getLink().toString());
-				Toast.makeText(getActivity(), "Article can't be loaded", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Article can't be loaded",
+						Toast.LENGTH_SHORT).show();
 			}
 		} else {
 			intent = new Intent(getSherlockActivity(), ItemDetailActivity.class);
@@ -193,7 +199,7 @@ public class ItemListFragment extends SherlockListFragment implements
 					.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
 			getListAdapter();
 			actionProvider.setShareIntent(ItemDetailFragment.createShareIntent(
-					selectedTitle, selectedUri));
+					selectedItem.getTitle(), Uri.parse(selectedItem.getLink().toString())));
 			return true;
 		}
 
@@ -204,8 +210,16 @@ public class ItemListFragment extends SherlockListFragment implements
 
 		@Override
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			ItemTable table = new ItemTable(getSherlockActivity());
 			if (item.getItemId() == R.id.menu_item_favorite) {
-				Log.d(TAG, "I have a favorite!");
+				ContentValues values = new ContentValues();
+				Log.d(TAG, "fav is " + selectedItem.isFavorite());
+				values.put(ItemTable.COLUMN_FAVORITE,
+						(selectedItem.isFavorite() ? DatabaseHelper.OFF
+								: DatabaseHelper.ON));
+				table.updateItem(selectedItem.getId(), values);
+				mode.finish();
+				return true;
 			}
 			mode.finish();
 			return false;
@@ -246,7 +260,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		String[] projection = new String[] { ItemTable._ID,
 				ItemTable.COLUMN_TITLE, ItemTable.COLUMN_PUBDATE,
-				ItemTable.COLUMN_READ };
+				ItemTable.COLUMN_READ, ItemTable.COLUMN_FAVORITE };
 		CursorLoader cursorLoader = new CursorLoader(getActivity(),
 				Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/"
 						+ mFeedId), projection, null, null,
@@ -263,5 +277,5 @@ public class ItemListFragment extends SherlockListFragment implements
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
 		mCursorAdapter.swapCursor(null);
-	}	
+	}
 }

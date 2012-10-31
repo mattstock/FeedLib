@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -23,6 +24,7 @@ public class ItemDetailFragment extends SherlockFragment {
 	Uri uri;
 	String title;
 	long id;
+	boolean fav;
 	
 	private static final String TAG = "ItemDetailFragment";
 
@@ -52,11 +54,13 @@ public class ItemDetailFragment extends SherlockFragment {
 		tv.setText(b.getString("pubDate"));
 		tv = (TextView) view.findViewById(R.id.item_title);
 		tv.setText(b.getString("title"));
-		CheckBox cb = (CheckBox) view.findViewById(R.id.star);
-		cb.setChecked(b.getBoolean("fav"));
+		fav = b.getBoolean("fav");
 		title = b.getString("title");
 		uri = Uri.parse(b.getString("uri"));
 		id = b.getLong("id");
+		ImageView ico = (ImageView) view.findViewById(R.id.status);
+		ico.setImageResource(R.drawable.ic_favorite);
+		ico.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
 		return view;
 	}
 
@@ -71,20 +75,25 @@ public class ItemDetailFragment extends SherlockFragment {
 		actionProvider.setShareIntent(createShareIntent(title, uri));
 	}
 
+	public boolean onOptionsItemSelected(MenuItem item) {
+		ItemTable table = new ItemTable(getSherlockActivity());
+		if (item.getItemId() == R.id.menu_item_favorite) {
+			Log.d(TAG, "toggle favorite: " + id);
+			ContentValues values = new ContentValues();
+			values.put(ItemTable.COLUMN_FAVORITE,
+					(fav ? DatabaseHelper.OFF
+							: DatabaseHelper.ON));
+			table.updateItem(id, values);
+			// TODO - need to manually change 
+			return true;
+		}		
+		return false;
+	}
+	
 	public void onClick(View v) {
 		if (v.getId() == R.id.web_view) {
 			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 			startActivity(intent);
-		}
-		if (v.getId() == R.id.star) {
-			CheckBox cb = (CheckBox) v;
-			ItemTable db = new ItemTable(getSherlockActivity());
-
-			// Change favorite state
-			Log.d(TAG, "Updating favorite on " + id);
-			ContentValues values = new ContentValues();
-			values.put(ItemTable.COLUMN_FAVORITE, (cb.isChecked() ? DatabaseHelper.ON : DatabaseHelper.OFF));
-			db.updateItem(id, values);
 		}
 	}
 

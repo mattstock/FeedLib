@@ -147,6 +147,7 @@ public class ItemTable implements BaseColumns {
 			if (!cursor.isNull(cursor.getColumnIndex(COLUMN_IMAGE)))
 				item.setImage(new URL(cursor.getString(cursor
 						.getColumnIndex(COLUMN_IMAGE))));
+			item.setFavorite(cursor.getInt(cursor.getColumnIndex(COLUMN_FAVORITE)));
 			item.setPubdate(new Date(cursor.getLong(cursor
 					.getColumnIndex(COLUMN_PUBDATE))));
 		} catch (MalformedURLException mue) {
