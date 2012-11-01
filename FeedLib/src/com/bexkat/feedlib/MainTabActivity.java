@@ -22,6 +22,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
+import com.bexkat.feedlib.db.ItemTable;
 
 public class MainTabActivity extends SherlockFragmentActivity {
 	private static final String TAG = "MainTabActivity";
@@ -63,12 +64,14 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		tab.setText("Favorites");
 		tab.setTabListener(tabListener);
 		actionBar.addTab(tab);
+		boolean first = true;
 		for (Feed feed : ft.getEnabledFeeds()) {
 			tab = actionBar.newTab();
 			tab.setText(feed.getTitle());
 			tab.setTag(feed);
 			tab.setTabListener(tabListener);
-			actionBar.addTab(tab);
+			actionBar.addTab(tab, first);
+			first = false;
 		}
 		actionBar.setSelectedNavigationItem(position);
 		selectInSpinnerIfPresent(position, false);
