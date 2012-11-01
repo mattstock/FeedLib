@@ -1,28 +1,24 @@
 package com.bexkat.feedlib;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
-import com.bexkat.feedlib.db.ItemTable;
+import com.viewpagerindicator.TabPageIndicator;
 
 public class MainTabActivity extends SherlockFragmentActivity {
 	private static final String TAG = "MainTabActivity";
@@ -32,9 +28,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setTheme(R.style.Theme_Sherlock);
-
+		setTheme(R.style.Theme_FeedLib);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		setContentView(R.layout.simple_tabs);
 
 		Log.d(TAG, "onCreate()");
 		if (savedInstanceState != null) {
@@ -53,28 +49,13 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			Log.d(TAG, "HTTP cache not available");
 		}
 
-		final ActionBar actionBar = getSupportActionBar();
+		FragmentPagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
 
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ViewPager pager = (ViewPager)findViewById(R.id.pager);
+        pager.setAdapter(adapter);
 
-		MyTabListener tabListener = new MyTabListener();
-
-		FeedTable ft = new FeedTable(this);
-		Tab tab = actionBar.newTab();
-		tab.setText("Favorites");
-		tab.setTabListener(tabListener);
-		actionBar.addTab(tab);
-		boolean first = true;
-		for (Feed feed : ft.getEnabledFeeds()) {
-			tab = actionBar.newTab();
-			tab.setText(feed.getTitle());
-			tab.setTag(feed);
-			tab.setTabListener(tabListener);
-			actionBar.addTab(tab, first);
-			first = false;
-		}
-		actionBar.setSelectedNavigationItem(position);
-		selectInSpinnerIfPresent(position, false);
+        TabPageIndicator indicator = (TabPageIndicator)findViewById(R.id.indicator);
+        indicator.setViewPager(pager);
 	}
 
 	@Override
@@ -109,61 +90,6 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		super.onSaveInstanceState(outState);
 	}
 
-	private class MyTabListener implements ActionBar.TabListener {
-
-		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {
-			Feed feed = (Feed) tab.getTag();
-
-			Log.d(TAG,
-					"onTabSelected(" + tab.getText() + "): "
-							+ tab.getPosition());
-			Fragment f;
-			FragmentManager fm = getSupportFragmentManager();
-
-			position = tab.getPosition();
-			f = fm.findFragmentByTag((String) tab.getText());
-			if (f == null) {
-				Bundle args = new Bundle();
-				f = new ItemListFragment();
-				if (feed == null) { // We want the favorites fragment
-					args.putLong("feedId", -1);
-					args.putString("title", "Favorites");
-				} else {
-					args.putLong("feedId", feed.getId());
-					args.putString("title", feed.getTitle());
-				}
-				f.setArguments(args);
-				// f.setRetainInstance(true);
-				ft.add(android.R.id.content, f, (String) tab.getText());
-			} else {
-				if (f.isDetached())
-					ft.attach(f);
-			}
-		}
-
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-			Log.d(TAG,
-					"onTabUnselected(" + tab.getText() + "): "
-							+ tab.getPosition());
-			Fragment f;
-			FragmentManager fm = getSupportFragmentManager();
-			f = fm.findFragmentByTag((String) tab.getText());
-			if (f != null) {
-				ft.detach(f);
-			}
-		}
-
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-			Log.d(TAG,
-					"onTabReselected(" + tab.getText() + "): "
-							+ tab.getPosition());
-		}
-
-	}
-
 	@SuppressWarnings("unchecked")
 	public void checkFreshness() {
 		Date now = new Date();
@@ -179,66 +105,40 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		new UpdateFeeds(this).execute(oldFeeds);
 	}
 
-	/**
-	 * Hack that takes advantage of interface parity between ActionBarSherlock
-	 * and the native interface to reach inside the classes to manually select
-	 * the appropriate tab spinner position if the overflow tab spinner is
-	 * showing.
-	 * 
-	 * Related issues:
-	 * https://github.com/JakeWharton/ActionBarSherlock/issues/240 and
-	 * https://android-review.googlesource.com/#/c/32492/
-	 * 
-	 * @author toulouse@crunchyroll.com
-	 */
-	private void selectInSpinnerIfPresent(int position, boolean animate) {
-		try {
-			View actionBarView = findViewById(R.id.abs__action_bar);
-			if (actionBarView == null) {
-				int id = getResources().getIdentifier("action_bar", "id",
-						"android");
-				actionBarView = findViewById(id);
+	private class FeedPagerAdapter extends FragmentPagerAdapter {
+		ArrayList<Feed> mFeeds;
+
+		public FeedPagerAdapter(FragmentManager fm) {
+			super(fm);
+			mFeeds = (new FeedTable(MainTabActivity.this)).getEnabledFeeds();
+			mFeeds.add(0, null); // For favorites
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			Bundle args = new Bundle();
+			ItemListFragment f = new ItemListFragment();
+
+			if (mFeeds.get(position) == null) { // We want the favorites fragment
+				args.putLong("feedId", -1);
+				args.putString("title", "Favorites");
+			} else {
+				args.putLong("feedId", mFeeds.get(position).getId());
+				args.putString("title", mFeeds.get(position).getTitle());
 			}
+			f.setArguments(args);
+			return f;
+		}
 
-			Class<?> actionBarViewClass = actionBarView.getClass();
-			Field mTabScrollViewField = actionBarViewClass
-					.getDeclaredField("mTabScrollView");
-			mTabScrollViewField.setAccessible(true);
-
-			Object mTabScrollView = mTabScrollViewField.get(actionBarView);
-			if (mTabScrollView == null) {
-				return;
-			}
-
-			Field mTabSpinnerField = mTabScrollView.getClass()
-					.getDeclaredField("mTabSpinner");
-			mTabSpinnerField.setAccessible(true);
-
-			Object mTabSpinner = mTabSpinnerField.get(mTabScrollView);
-			if (mTabSpinner == null) {
-				return;
-			}
-
-			Method setSelectionMethod = mTabSpinner
-					.getClass()
-					.getSuperclass()
-					.getDeclaredMethod("setSelection", Integer.TYPE,
-							Boolean.TYPE);
-			setSelectionMethod.invoke(mTabSpinner, position, animate);
-
-			Method requestLayoutMethod = mTabSpinner.getClass().getSuperclass()
-					.getDeclaredMethod("requestLayout");
-			requestLayoutMethod.invoke(mTabSpinner);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+        public CharSequence getPageTitle(int position) {
+        	if (mFeeds.get(position) == null)
+        		return "Favorites";
+        	else
+        		return mFeeds.get(position).getTitle();
+        }
+		@Override
+		public int getCount() {
+			return mFeeds.size();
 		}
 	}
 }
