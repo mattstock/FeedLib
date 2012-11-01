@@ -53,9 +53,9 @@ public class MainTabActivity extends SherlockFragmentActivity {
 
         ViewPager pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);
-
         TabPageIndicator indicator = (TabPageIndicator)findViewById(R.id.indicator);
         indicator.setViewPager(pager);
+        pager.setCurrentItem(1);
 	}
 
 	@Override
