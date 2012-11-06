@@ -27,14 +27,11 @@ import android.util.Log;
 import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.bexkat.feedlib.db.Item;
 import com.bexkat.feedlib.db.ItemTable;
 
 public class ItemDetailActivity extends SherlockFragmentActivity {
 	private static final String TAG = "ItemDetailActivity";
-	private static final int MENU_ABOUT = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
