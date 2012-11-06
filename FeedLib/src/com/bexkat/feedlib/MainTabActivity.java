@@ -8,13 +8,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
@@ -22,7 +19,6 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class MainTabActivity extends SherlockFragmentActivity {
 	private static final String TAG = "MainTabActivity";
-	private static final int MENU_ABOUT = 2;
 	private int position = 0;
 
 	@Override
@@ -62,26 +58,6 @@ public class MainTabActivity extends SherlockFragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		checkFreshness();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ABOUT, Menu.CATEGORY_SECONDARY, "About")
-				.setIcon(R.drawable.ic_menu_info_details)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_ABOUT:
-			FragmentTransaction ft = getSupportFragmentManager()
-					.beginTransaction();
-			AboutFragment af = new AboutFragment();
-			af.show(ft, "about");
-			return true;
-		}
-		return false;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -39,7 +40,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -231,11 +231,10 @@ public class ItemListFragment extends SherlockListFragment implements
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		Log.d(TAG, "options menu: " + mFeedId);
 		if (mFeedId != -1)
-			inflater.inflate(R.menu.itemlist, menu);
-		else
-			super.onCreateOptionsMenu(menu, inflater);
+			inflater.inflate(R.menu.nonfav_menu, menu);
+		inflater.inflate(R.menu.allfeeds_menu, menu);
+		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -253,6 +252,18 @@ public class ItemListFragment extends SherlockListFragment implements
 			return true;
 		} else if (itemId == R.id.menu_item_read) {
 			ft.markAllAsRead(mFeedId);
+			return true;
+		} else if (itemId == R.id.menu_item_about) {
+			FragmentTransaction ftrans = getFragmentManager()
+					.beginTransaction();
+			AboutFragment af = new AboutFragment();
+			af.show(ftrans, "about");
+			return true;
+		} else if (itemId == R.id.menu_item_help) {
+			FragmentTransaction ftrans = getFragmentManager()
+					.beginTransaction();
+			HelpFragment hf = new HelpFragment();
+			hf.show(ftrans, "help");
 			return true;
 		}
 		return false;

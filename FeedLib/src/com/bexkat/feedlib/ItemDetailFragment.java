@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,6 +69,7 @@ public class ItemDetailFragment extends SherlockFragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_item_detail, menu);
+		inflater.inflate(R.menu.allfeeds_menu, menu);
 		MenuItem actionItem = menu.findItem(R.id.menu_item_share);
 		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
 				.getActionProvider();
@@ -78,7 +80,8 @@ public class ItemDetailFragment extends SherlockFragment {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		ItemTable table = new ItemTable(getSherlockActivity());
-		if (item.getItemId() == R.id.menu_item_favorite) {
+		int itemId = item.getItemId();
+		if (itemId == R.id.menu_item_favorite) {
 			Log.d(TAG, "toggle favorite: " + id + " - " + fav);
 			fav = !fav;
 			favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
@@ -87,6 +90,18 @@ public class ItemDetailFragment extends SherlockFragment {
 					(fav ? DatabaseHelper.ON
 							: DatabaseHelper.OFF));
 			table.updateItem(id, values);
+			return true;
+		} else if (itemId == R.id.menu_item_about) {
+			FragmentTransaction ftrans = getFragmentManager()
+					.beginTransaction();
+			AboutFragment af = new AboutFragment();
+			af.show(ftrans, "about");
+			return true;
+		} else if (itemId == R.id.menu_item_help) {
+			FragmentTransaction ftrans = getFragmentManager()
+					.beginTransaction();
+			HelpFragment hf = new HelpFragment();
+			hf.show(ftrans, "help");
 			return true;
 		}		
 		return false;

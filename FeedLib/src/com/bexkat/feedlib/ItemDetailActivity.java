@@ -70,26 +70,6 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ABOUT, Menu.CATEGORY_SECONDARY, "About")
-				.setIcon(R.drawable.ic_menu_info_details)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_ABOUT:
-			FragmentTransaction ft = getSupportFragmentManager()
-					.beginTransaction();
-			AboutFragment af = new AboutFragment();
-			af.show(ft, "about");
-			return true;
-		}
-		return false;
-	}
-
 	public void onClick(View v) {
 		ItemDetailFragment f = (ItemDetailFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);
 		if (f == null)
