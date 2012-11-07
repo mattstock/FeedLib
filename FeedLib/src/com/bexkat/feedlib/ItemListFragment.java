@@ -257,7 +257,17 @@ public class ItemListFragment extends SherlockListFragment implements
 		} else if (itemId == R.id.menu_item_about) {
 			FragmentTransaction ftrans = getFragmentManager()
 					.beginTransaction();
+			Bundle b = new Bundle();
+			if (mFeedId == -1) {
+				b.putString("title", "Favorites");
+				b.putString("desc", "A summary of the news items that have been marked as favorites.");
+			} else {
+				feed = feedtable.getFeed(mFeedId);
+				b.putString("title", feed.getTitle());
+				b.putString("desc", feed.getDescription());
+			}
 			AboutFragment af = new AboutFragment();
+			af.setArguments(b);
 			af.show(ftrans, "about");
 			return true;
 		} else if (itemId == R.id.menu_item_help) {

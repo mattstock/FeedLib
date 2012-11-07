@@ -68,7 +68,6 @@ public class ItemDetailFragment extends SherlockFragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_item_detail, menu);
-		inflater.inflate(R.menu.allfeeds_menu, menu);
 		MenuItem actionItem = menu.findItem(R.id.menu_item_share);
 		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
 				.getActionProvider();

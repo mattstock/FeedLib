@@ -11,9 +11,13 @@ public class AboutFragment extends SherlockDialogFragment {
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
+		Bundle b = getArguments();
+		String title = b.getString("title");
+		String description = b.getString("desc");
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage(R.string.about_msg)
-				.setTitle("About")
+		builder.setMessage(description)
+				.setTitle(title)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 
