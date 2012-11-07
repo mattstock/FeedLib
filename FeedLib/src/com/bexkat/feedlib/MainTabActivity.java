@@ -4,10 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
@@ -19,20 +21,17 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class MainTabActivity extends SherlockFragmentActivity {
 	private static final String TAG = "MainTabActivity";
-	private int position = 0;
-
+	private int position;
+	private boolean firstuse;
+	private SharedPreferences prefs;
+	private ViewPager pager;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTheme(R.style.Theme_FeedLib);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.simple_tabs);
-
-		Log.d(TAG, "onCreate()");
-		if (savedInstanceState != null) {
-			position = savedInstanceState.getInt("position");
-			Log.d(TAG, "restoring state: " + position);
-		}
 
 		// Enable http cache if available
 		try {
@@ -45,25 +44,40 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			Log.d(TAG, "HTTP cache not available");
 		}
 
+		prefs = getPreferences(MODE_PRIVATE);
+		
 		FragmentPagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
-
-        ViewPager pager = (ViewPager)findViewById(R.id.pager);
+        pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);
         TabPageIndicator indicator = (TabPageIndicator)findViewById(R.id.indicator);
         indicator.setViewPager(pager);
-        pager.setCurrentItem(1);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		firstuse = prefs.getBoolean("firstuse", true);
+		
+		if (firstuse) {
+			FragmentTransaction ftrans = getSupportFragmentManager()
+					.beginTransaction();
+			HelpFragment hf = new HelpFragment();
+			hf.show(ftrans, "help");			
+			firstuse = false;
+		}
+		
+		position = prefs.getInt("position", 1);
+        pager.setCurrentItem(position);
 		checkFreshness();
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt("position", position);
-		super.onSaveInstanceState(outState);
+	public void onPause() {
+		SharedPreferences.Editor edit = prefs.edit();
+		edit.putInt("position", position);
+		edit.putBoolean("firstuse", firstuse);
+		edit.commit();
+		super.onPause();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,26 +105,27 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		}
 
 		@Override
-		public Fragment getItem(int position) {
+		public Fragment getItem(int newposition) {
 			Bundle args = new Bundle();
 			ItemListFragment f = new ItemListFragment();
 
-			if (mFeeds.get(position) == null) { // We want the favorites fragment
+			position = newposition;
+			if (mFeeds.get(newposition) == null) { // We want the favorites fragment
 				args.putLong("feedId", -1);
 				args.putString("title", "Favorites");
 			} else {
-				args.putLong("feedId", mFeeds.get(position).getId());
-				args.putString("title", mFeeds.get(position).getTitle());
+				args.putLong("feedId", mFeeds.get(newposition).getId());
+				args.putString("title", mFeeds.get(newposition).getTitle());
 			}
 			f.setArguments(args);
 			return f;
 		}
 
-        public CharSequence getPageTitle(int position) {
-        	if (mFeeds.get(position) == null)
+        public CharSequence getPageTitle(int index) {
+        	if (mFeeds.get(index) == null)
         		return "Favorites";
         	else
-        		return mFeeds.get(position).getTitle();
+        		return mFeeds.get(index).getTitle();
         }
 		@Override
 		public int getCount() {

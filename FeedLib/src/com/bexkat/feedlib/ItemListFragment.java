@@ -239,19 +239,20 @@ public class ItemListFragment extends SherlockListFragment implements
 
 	@SuppressWarnings("unchecked")
 	public boolean onOptionsItemSelected(MenuItem item) {
-		FeedTable ft = new FeedTable(getActivity());
-		Feed f = ft.getFeed(mFeedId);
-
+		FeedTable feedtable = new FeedTable(getActivity());
+		Feed feed;
+		
 		Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ", " + mFeedId);
 
 		int itemId = item.getItemId();
 		if (itemId == R.id.menu_item_refresh) {
+			feed = feedtable.getFeed(mFeedId);
 			ArrayList<Feed> array = new ArrayList<Feed>();
-			array.add(f);
+			array.add(feed);
 			new UpdateFeeds(getSherlockActivity()).execute(array);
 			return true;
 		} else if (itemId == R.id.menu_item_read) {
-			ft.markAllAsRead(mFeedId);
+			feedtable.markAllAsRead(mFeedId);
 			return true;
 		} else if (itemId == R.id.menu_item_about) {
 			FragmentTransaction ftrans = getFragmentManager()

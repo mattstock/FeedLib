@@ -16,6 +16,7 @@
     <string name="help">Help</string>
     <string name="about">About</string>
     <string name="read">Mark all as read</string>
+    <string name="ok">OK</string>
     <string name="loading">No Articles Available</string>
     <string name="share_subject">An article you should look at</string>
     <string name="authority">com.bexkat.feedlib.contentprovider</string>
