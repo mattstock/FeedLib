@@ -17,6 +17,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
+import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
 public class MainTabActivity extends SherlockFragmentActivity {
@@ -25,6 +26,17 @@ public class MainTabActivity extends SherlockFragmentActivity {
 	private boolean firstuse;
 	private SharedPreferences prefs;
 	private ViewPager pager;
+	private int number_icons[] = {
+			R.drawable.zero,
+			R.drawable.one,
+			R.drawable.two,
+			R.drawable.three,
+			R.drawable.four,
+			R.drawable.five,
+			R.drawable.six,
+			R.drawable.seven,
+			R.drawable.eight,
+			R.drawable.nine };
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,12 +107,14 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		new UpdateFeeds(this).execute(oldFeeds);
 	}
 
-	private class FeedPagerAdapter extends FragmentPagerAdapter {
+	private class FeedPagerAdapter extends FragmentPagerAdapter implements IconPagerAdapter {
 		ArrayList<Feed> mFeeds;
-
+		FeedTable feedtable;
+		
 		public FeedPagerAdapter(FragmentManager fm) {
 			super(fm);
-			mFeeds = (new FeedTable(MainTabActivity.this)).getEnabledFeeds();
+			feedtable = new FeedTable(MainTabActivity.this);
+			mFeeds = feedtable.getEnabledFeeds();
 			mFeeds.add(0, null); // For favorites
 		}
 
@@ -127,9 +141,29 @@ public class MainTabActivity extends SherlockFragmentActivity {
         	else
         		return mFeeds.get(index).getTitle();
         }
+        
 		@Override
 		public int getCount() {
 			return mFeeds.size();
+		}
+
+		@Override
+		public int getIconResId(int index) {
+			Feed feed = mFeeds.get(index);
+			
+			if (feed == null) {
+				// TODO figure out sum of all unread
+			} else {
+				return mapCount(feed.getUnreadCount());
+			}
+			return 0;
+		}
+		
+		// Takes a count and returns the correct icon resource ID
+		private int mapCount(int count) {
+			if (count > 9)
+				return R.drawable.logo; // TODO
+			return number_icons[count];
 		}
 	}
 }
