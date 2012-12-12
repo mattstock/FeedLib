@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +16,7 @@ import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Window;
+import com.bexkat.feedlib.db.DatabaseHelper;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
 import com.viewpagerindicator.IconPagerAdapter;
@@ -83,6 +85,7 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 		position = prefs.getInt("position", 1);
         pager.setCurrentItem(position);
 		checkFreshness();
+		
 	}
 
 	@Override
@@ -172,4 +175,5 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 	public void refreshUnreadCount() {
 		indicator.notifyDataSetChanged();
 	}
+	
 }
