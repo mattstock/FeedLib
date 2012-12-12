@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -66,6 +67,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	private long mFeedId = -1;
 	private ActionMode mActionMode;
 	private Item selectedItem;
+	private IndicatorCallback callback;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -87,6 +89,17 @@ public class ItemListFragment extends SherlockListFragment implements
 		return v;
 	}
 
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			callback = (IndicatorCallback) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement IndicatorCallback");
+		}
+	}
+	
 	@Override
 	public void onActivityCreated(Bundle saveInstanceState) {
 		String[] from = new String[] { ItemTable.COLUMN_TITLE,
@@ -165,6 +178,7 @@ public class ItemListFragment extends SherlockListFragment implements
 		ContentValues values = new ContentValues();
 		values.put(ItemTable.COLUMN_READ, DatabaseHelper.ON);
 		db.updateItem(id, values);
+		callback.refreshUnreadCount();
 		// If there is content, display in a new view.
 		// If not, ask someone else to handle the display of the item.
 		String content = item.getContent();
@@ -253,6 +267,7 @@ public class ItemListFragment extends SherlockListFragment implements
 			return true;
 		} else if (itemId == R.id.menu_item_read) {
 			feedtable.markAllAsRead(mFeedId);
+			callback.refreshUnreadCount();
 			return true;
 		} else if (itemId == R.id.menu_item_about) {
 			FragmentTransaction ftrans = getFragmentManager()

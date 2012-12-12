@@ -171,5 +171,5 @@ public class Feed {
 		s = s + "}}";
 		return s;
 	}
-	
+
 }

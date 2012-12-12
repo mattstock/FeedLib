@@ -20,14 +20,16 @@ import com.bexkat.feedlib.db.FeedTable;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class MainTabActivity extends SherlockFragmentActivity {
+public class MainTabActivity extends SherlockFragmentActivity implements IndicatorCallback {
 	private static final String TAG = "MainTabActivity";
 	private int position;
 	private boolean firstuse;
 	private SharedPreferences prefs;
 	private ViewPager pager;
+	private TabPageIndicator indicator;
+	
 	private int number_icons[] = {
-			R.drawable.zero,
+			0,
 			R.drawable.one,
 			R.drawable.two,
 			R.drawable.three,
@@ -61,7 +63,7 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		FragmentPagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
         pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);
-        TabPageIndicator indicator = (TabPageIndicator)findViewById(R.id.indicator);
+        indicator = (TabPageIndicator)findViewById(R.id.indicator);
         indicator.setViewPager(pager);
 	}
 
@@ -88,6 +90,7 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		SharedPreferences.Editor edit = prefs.edit();
 		edit.putInt("position", position);
 		edit.putBoolean("firstuse", firstuse);
+		Log.d(TAG, String.format("saving position %d", position));
 		edit.commit();
 		super.onPause();
 	}
@@ -123,11 +126,12 @@ public class MainTabActivity extends SherlockFragmentActivity {
 			Bundle args = new Bundle();
 			ItemListFragment f = new ItemListFragment();
 
-			position = newposition;
+			position = newposition-1;
 			if (mFeeds.get(newposition) == null) { // We want the favorites fragment
 				args.putLong("feedId", -1);
 				args.putString("title", "Favorites");
 			} else {
+				Log.d(TAG, String.format("On position %d (%s)", position, mFeeds.get(newposition).getTitle()));
 				args.putLong("feedId", mFeeds.get(newposition).getId());
 				args.putString("title", mFeeds.get(newposition).getTitle());
 			}
@@ -151,19 +155,21 @@ public class MainTabActivity extends SherlockFragmentActivity {
 		public int getIconResId(int index) {
 			Feed feed = mFeeds.get(index);
 			
-			if (feed == null) {
-				// TODO figure out sum of all unread
-			} else {
-				return mapCount(feed.getUnreadCount());
-			}
-			return 0;
+			if (feed == null)
+				return mapCount(feedtable.getUnreadCount(-1));
+			else
+				return mapCount(feedtable.getUnreadCount(feed.getId()));
 		}
 		
 		// Takes a count and returns the correct icon resource ID
 		private int mapCount(int count) {
 			if (count > 9)
-				return R.drawable.logo; // TODO
+				return R.drawable.nineplus;
 			return number_icons[count];
 		}
+	}
+	
+	public void refreshUnreadCount() {
+		indicator.notifyDataSetChanged();
 	}
 }

@@ -57,7 +57,7 @@ public class FeedTable implements BaseColumns {
 	public static final String DROP_TABLE = "DROP TABLE IF EXISTS "
 			+ TABLE_NAME;
 	private ContentResolver mResolver;
-	
+
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(CREATE_TABLE);
 	}
@@ -74,15 +74,16 @@ public class FeedTable implements BaseColumns {
 	public FeedTable(Context context) {
 		mResolver = context.getContentResolver();
 	}
+
 	public long addFeed(Feed feed) {
 		return addFeed(feed.toContentValues(), feed.getItems());
 	}
 
 	public long addFeed(ContentValues values, List<Item> items) {
-		Uri feedUri = mResolver.insert(
-				MyContentProvider.FEED_CONTENT_URI, values);
+		Uri feedUri = mResolver.insert(MyContentProvider.FEED_CONTENT_URI,
+				values);
 		ItemTable itemtable = new ItemTable(mResolver);
-		
+
 		if (items != null && feedUri != null) {
 			for (Item item : items) {
 				itemtable.addItem(getFeed(feedUri), item);
@@ -94,8 +95,7 @@ public class FeedTable implements BaseColumns {
 
 	public Feed getFeed(Uri feedUri) {
 		Feed feed = null;
-		Cursor cursor = mResolver.query(feedUri, null, null,
-				null, null);
+		Cursor cursor = mResolver.query(feedUri, null, null, null, null);
 
 		try {
 			if (cursor.moveToFirst()) {
@@ -137,9 +137,9 @@ public class FeedTable implements BaseColumns {
 
 	public Feed getFirstFeed() {
 		String[] projection = { FeedTable._ID };
-		Cursor cursor = mResolver.query(
-				MyContentProvider.FEED_CONTENT_URI, projection, null, null,
-				FeedTable._ID + DatabaseHelper.SORT_ASC);
+		Cursor cursor = mResolver
+				.query(MyContentProvider.FEED_CONTENT_URI, projection, null,
+						null, FeedTable._ID + DatabaseHelper.SORT_ASC);
 		Feed firstFeed = null;
 
 		if (cursor.moveToFirst())
@@ -195,22 +195,21 @@ public class FeedTable implements BaseColumns {
 	}
 
 	public ArrayList<Feed> getEnabledFeeds() {
-		return getFeeds(FeedTable.COLUMN_ENABLE + "=?", new String[] { Long.toString(DatabaseHelper.ON) });
+		return getFeeds(FeedTable.COLUMN_ENABLE + "=?",
+				new String[] { Long.toString(DatabaseHelper.ON) });
 	}
-	
+
 	public ArrayList<Feed> getFeeds() {
 		return getFeeds(null, null);
 	}
-	
+
 	public ArrayList<Feed> getFeeds(String selection, String[] selectionArgs) {
-		
+
 		String[] projection = { FeedTable._ID };
 		ArrayList<Feed> feeds = new ArrayList<Feed>();
-		Cursor cursor = mResolver.query(
-				MyContentProvider.FEED_CONTENT_URI, projection,
-				selection,
-				selectionArgs,
-				FeedTable._ID + DatabaseHelper.SORT_ASC);
+		Cursor cursor = mResolver.query(MyContentProvider.FEED_CONTENT_URI,
+				projection, selection, selectionArgs, FeedTable._ID
+						+ DatabaseHelper.SORT_ASC);
 		if (cursor == null)
 			return null;
 		cursor.moveToFirst();
@@ -225,11 +224,28 @@ public class FeedTable implements BaseColumns {
 			cursor.close();
 		return feeds;
 	}
-	
+
+	public int getUnreadCount(long feedId) {
+		String[] projection = { ItemTable._ID };
+		Cursor cursor;
+
+		if (feedId == -1)
+			return 0;
+		
+		cursor = mResolver.query(Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/" + feedId),
+					projection, ItemTable.COLUMN_READ + "=?", new String[] { Long.toString(DatabaseHelper.OFF) }, null);
+			
+		if (cursor == null)
+			return 0;
+		int foo = cursor.getCount();
+		cursor.close();
+		return foo;
+	}
+
 	public void markAllAsRead(long feedId) {
 		ContentValues values = new ContentValues();
 		values.put(ItemTable.COLUMN_READ, DatabaseHelper.ON);
-		mResolver.update(Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/" + feedId),
-				values, null, null);
+		mResolver.update(Uri.parse(MyContentProvider.FEEDLIST_CONTENT_URI + "/"
+				+ feedId), values, null, null);
 	}
 }
