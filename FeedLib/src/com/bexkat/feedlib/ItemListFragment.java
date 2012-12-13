@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -53,6 +54,8 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.bexkat.feedlib.db.DatabaseHelper;
+import com.bexkat.feedlib.db.Enclosure;
+import com.bexkat.feedlib.db.EnclosureTable;
 import com.bexkat.feedlib.db.Feed;
 import com.bexkat.feedlib.db.FeedTable;
 import com.bexkat.feedlib.db.Item;
@@ -170,8 +173,9 @@ public class ItemListFragment extends SherlockListFragment implements
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Intent intent = null;
 
-		Log.d(TAG, "Item click for view (" + v.getId() + "): " + id);
 		ItemTable db = new ItemTable(getSherlockActivity());
+		EnclosureTable et = new EnclosureTable(getSherlockActivity());
+		
 		Item item = db.getItem(id);
 
 		// Mark as read
@@ -182,11 +186,20 @@ public class ItemListFragment extends SherlockListFragment implements
 		// If there is content, display in a new view.
 		// If not, ask someone else to handle the display of the item.
 		String content = item.getContent();
+		Uri uri;
+		
 		if (content == null || content.length() < 10) {
 			try {
-				intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item
-						.getLink().toURI().toString()));
-				startActivity(intent);
+				List<Enclosure> encs = et.getEnclosures(item);
+				if (encs != null) {
+					uri = Uri.parse(encs.get(0).getURL().toString());
+					intent = new Intent(Intent.ACTION_VIEW, uri);
+					startActivity(intent);
+				} else if (item.getLink() != null) {
+					uri = Uri.parse(item.getLink().toURI().toString());
+					intent = new Intent(Intent.ACTION_VIEW, uri);
+					startActivity(intent);
+				}
 			} catch (URISyntaxException e) {
 				Log.d(TAG, "URL fail: " + item.getLink().toString());
 				Toast.makeText(getActivity(), "Article can't be loaded",

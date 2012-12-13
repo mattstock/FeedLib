@@ -60,7 +60,6 @@ public class ItemDetailFragment extends SherlockFragment {
 		uri = Uri.parse(b.getString("uri"));
 		id = b.getLong("id");
 		favIcon = (ImageView) view.findViewById(R.id.status);
-		Log.d(TAG, "changing visibility - " + fav);
 		favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
 		return view;
 	}
@@ -80,7 +79,6 @@ public class ItemDetailFragment extends SherlockFragment {
 		ItemTable table = new ItemTable(getSherlockActivity());
 		int itemId = item.getItemId();
 		if (itemId == R.id.menu_item_favorite) {
-			Log.d(TAG, "toggle favorite: " + id + " - " + fav);
 			fav = !fav;
 			favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
 			ContentValues values = new ContentValues();

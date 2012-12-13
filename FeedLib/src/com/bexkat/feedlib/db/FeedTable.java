@@ -208,7 +208,7 @@ public class FeedTable implements BaseColumns {
 		String[] projection = { FeedTable._ID };
 		ArrayList<Feed> feeds = new ArrayList<Feed>();
 		Cursor cursor = mResolver.query(MyContentProvider.FEED_CONTENT_URI,
-				projection, selection, selectionArgs, FeedTable._ID
+				projection, selection, selectionArgs, FeedTable.COLUMN_TITLE
 						+ DatabaseHelper.SORT_ASC);
 		if (cursor == null)
 			return null;

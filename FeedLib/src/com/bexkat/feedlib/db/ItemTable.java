@@ -175,8 +175,9 @@ public class ItemTable implements BaseColumns {
 
 	public boolean hasItem(long feedId, Item item) {
 		boolean found;
+		String link = (item.getLink() == null ? "null" : item.getLink().toString());
 		String[] args = new String[] { Long.toString(feedId),
-				item.getLink().toString(), item.getGuid(), item.getTitle() };
+				link, item.getGuid(), item.getTitle() };
 		String[] projection = new String[] { ItemTable._ID };
 		Cursor cursor = mResolver.query(MyContentProvider.ITEM_CONTENT_URI,
 				projection, ItemTable.COLUMN_FEED_ID + "=? AND ("

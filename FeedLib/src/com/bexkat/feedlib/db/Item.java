@@ -178,7 +178,10 @@ public class Item {
 	public ContentValues toContentValues() {
 		ContentValues values = new ContentValues();
 		// values.put(ItemTable._ID, mId);
-		values.put(ItemTable.COLUMN_LINK, mLink.toString());
+		if (mLink == null)
+			values.putNull(ItemTable.COLUMN_LINK);
+		else
+			values.put(ItemTable.COLUMN_LINK, mLink.toString());
 		values.put(ItemTable.COLUMN_GUID, mGuid);
 		values.put(ItemTable.COLUMN_TITLE, mTitle);
 		if (mDescription == null)

@@ -20,12 +20,15 @@ package com.bexkat.feedlib.db;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.bexkat.feedlib.MyContentProvider;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -50,6 +53,10 @@ public class EnclosureTable implements BaseColumns {
 
 	public EnclosureTable(ContentResolver resolver) {
 		mResolver = resolver;
+	}
+	
+	public EnclosureTable(Context context) {
+		mResolver = context.getContentResolver();
 	}
 
 	public static void onCreate(SQLiteDatabase database) {
@@ -82,6 +89,22 @@ public class EnclosureTable implements BaseColumns {
 		return getEnclosure(enclosureUri).getId();
 	}
 
+	public List<Enclosure> getEnclosures(Item item) {
+		List<Enclosure> tmp = new ArrayList<Enclosure>();
+		
+		Cursor cursor = mResolver.query(Uri.parse(MyContentProvider.ITEMLIST_CONTENT_URI + "/" + item.getId()),
+				null, null, null, null);
+		
+		if (cursor == null)
+			return tmp;
+		
+		// TODO need to iterate
+		cursor.moveToFirst();
+		tmp.add(cursorToEnclosure(cursor));
+		cursor.close();
+		return tmp;
+	}
+	
 	public Enclosure getEnclosure(long enclosureId) {
 		return getEnclosure(Uri.parse(MyContentProvider.ENCLOSURE_CONTENT_URI
 				+ "/" + enclosureId));

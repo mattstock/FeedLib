@@ -73,7 +73,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		super.onOpen(db);
-
+		
+		Log.d(TAG, "onOpen()");
+		
 		SharedPreferences prefs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
 		int oldver = prefs.getInt("version", 1);
 		int newver = 1;

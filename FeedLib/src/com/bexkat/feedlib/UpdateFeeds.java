@@ -17,13 +17,21 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Void, Boolean> {
+public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Long, Boolean> {
 	private static final String TAG = "UpdateFeeds";
-	SherlockFragmentActivity activity;
+	private SherlockFragmentActivity activity;
+	private IndicatorCallback callback;
 	
 	public UpdateFeeds(SherlockFragmentActivity activity) {
 		this.activity = activity;
-	}
+
+		try {
+			callback = (IndicatorCallback) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString()
+					+ " must implement IndicatorCallback");
+		}
+}
 	
 	@Override
 	protected void onPreExecute() {
@@ -53,15 +61,17 @@ public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Void, Boolean> {
 
 				handledFeed.setId(feedId);
 
-				ft.updateFeed(handledFeed);
+				if (ft.updateFeed(handledFeed))
+					publishProgress(feedId);
+				
 				it.cleanDbItems(feedId);
 
 			} catch (IOException ioe) {
 				Log.e(TAG, "", ioe);
 			} catch (SAXException se) {
-				Log.e(TAG, "", se);
+				Log.e(TAG, "SAX Error");
 			} catch (ParserConfigurationException pce) {
-				Log.e(TAG, "", pce);
+				Log.e(TAG, "Parser Error");
 			}
 
 			lastItem = it.getLastItem(feedId);
@@ -71,6 +81,10 @@ public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Void, Boolean> {
 				newitems = true;
 		}
 		return newitems;
+	}
+	
+	protected void onProgressUpdate(Long... values) {
+		callback.refreshUnreadCount();
 	}
 	
 	protected void onPostExecute(Boolean newItems) {

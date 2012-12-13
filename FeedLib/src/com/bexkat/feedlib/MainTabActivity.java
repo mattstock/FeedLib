@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -24,7 +25,6 @@ import com.viewpagerindicator.TabPageIndicator;
 
 public class MainTabActivity extends SherlockFragmentActivity implements IndicatorCallback {
 	private static final String TAG = "MainTabActivity";
-	private int position;
 	private boolean firstuse;
 	private SharedPreferences prefs;
 	private ViewPager pager;
@@ -62,7 +62,7 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 
 		prefs = getPreferences(MODE_PRIVATE);
 		
-		FragmentPagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
+		FragmentStatePagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
         pager = (ViewPager)findViewById(R.id.pager);
         pager.setAdapter(adapter);
         indicator = (TabPageIndicator)findViewById(R.id.indicator);
@@ -82,8 +82,7 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 			firstuse = false;
 		}
 		
-		position = prefs.getInt("position", 1);
-        pager.setCurrentItem(position);
+        pager.setCurrentItem(prefs.getInt("position", 1));
 		checkFreshness();
 		
 	}
@@ -91,9 +90,8 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 	@Override
 	public void onPause() {
 		SharedPreferences.Editor edit = prefs.edit();
-		edit.putInt("position", position);
+		edit.putInt("position", pager.getCurrentItem());
 		edit.putBoolean("firstuse", firstuse);
-		Log.d(TAG, String.format("saving position %d", position));
 		edit.commit();
 		super.onPause();
 	}
@@ -113,7 +111,7 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 		new UpdateFeeds(this).execute(oldFeeds);
 	}
 
-	private class FeedPagerAdapter extends FragmentPagerAdapter implements IconPagerAdapter {
+	private class FeedPagerAdapter extends FragmentStatePagerAdapter implements IconPagerAdapter {
 		ArrayList<Feed> mFeeds;
 		FeedTable feedtable;
 		
@@ -129,12 +127,10 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 			Bundle args = new Bundle();
 			ItemListFragment f = new ItemListFragment();
 
-			position = newposition-1;
-			if (mFeeds.get(newposition) == null) { // We want the favorites fragment
+			if (newposition == 0) { // We want the favorites fragment
 				args.putLong("feedId", -1);
 				args.putString("title", "Favorites");
 			} else {
-				Log.d(TAG, String.format("On position %d (%s)", position, mFeeds.get(newposition).getTitle()));
 				args.putLong("feedId", mFeeds.get(newposition).getId());
 				args.putString("title", mFeeds.get(newposition).getTitle());
 			}
