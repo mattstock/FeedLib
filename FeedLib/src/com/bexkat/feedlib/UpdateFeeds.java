@@ -89,7 +89,5 @@ public class UpdateFeeds extends AsyncTask<ArrayList<Feed>, Long, Boolean> {
 	
 	protected void onPostExecute(Boolean newItems) {
         activity.setSupportProgressBarIndeterminateVisibility(false);
-		if (newItems)
-			Toast.makeText(activity, "New items found", Toast.LENGTH_SHORT).show();
 	}
 }

@@ -179,7 +179,7 @@ public class Item {
 		ContentValues values = new ContentValues();
 		// values.put(ItemTable._ID, mId);
 		if (mLink == null)
-			values.putNull(ItemTable.COLUMN_LINK);
+			values.put(ItemTable.COLUMN_LINK, "http://");
 		else
 			values.put(ItemTable.COLUMN_LINK, mLink.toString());
 		values.put(ItemTable.COLUMN_GUID, mGuid);

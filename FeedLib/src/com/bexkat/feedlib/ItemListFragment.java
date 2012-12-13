@@ -18,7 +18,9 @@
 
 package com.bexkat.feedlib;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,7 +104,7 @@ public class ItemListFragment extends SherlockListFragment implements
 					+ " must implement IndicatorCallback");
 		}
 	}
-	
+
 	@Override
 	public void onActivityCreated(Bundle saveInstanceState) {
 		String[] from = new String[] { ItemTable.COLUMN_TITLE,
@@ -175,7 +177,7 @@ public class ItemListFragment extends SherlockListFragment implements
 
 		ItemTable db = new ItemTable(getSherlockActivity());
 		EnclosureTable et = new EnclosureTable(getSherlockActivity());
-		
+
 		Item item = db.getItem(id);
 
 		// Mark as read
@@ -187,24 +189,34 @@ public class ItemListFragment extends SherlockListFragment implements
 		// If not, ask someone else to handle the display of the item.
 		String content = item.getContent();
 		Uri uri;
-		
-		if (content == null || content.length() < 10) {
-			try {
-				List<Enclosure> encs = et.getEnclosures(item);
-				if (encs != null) {
-					uri = Uri.parse(encs.get(0).getURL().toString());
-					intent = new Intent(Intent.ACTION_VIEW, uri);
-					startActivity(intent);
-				} else if (item.getLink() != null) {
-					uri = Uri.parse(item.getLink().toURI().toString());
-					intent = new Intent(Intent.ACTION_VIEW, uri);
-					startActivity(intent);
-				}
-			} catch (URISyntaxException e) {
-				Log.d(TAG, "URL fail: " + item.getLink().toString());
+		List<Enclosure> encs = et.getEnclosures(item);
+
+		try {
+			if (encs != null)
+				uri = Uri.parse(encs.get(0).getURL().toURI().toString());
+			else if (!item.getLink().equals(new URL("http://")))
+				uri = Uri.parse(item.getLink().toURI().toString());
+			else {
+				Log.d(TAG, "Can't find a useful link");
 				Toast.makeText(getActivity(), "Article can't be loaded",
 						Toast.LENGTH_SHORT).show();
+				return;				
 			}
+		} catch (URISyntaxException e) {
+			Log.d(TAG, "URI fail: " + item.getLink().toString());
+			Toast.makeText(getActivity(), "Article can't be loaded",
+					Toast.LENGTH_SHORT).show();
+			return;
+		} catch (MalformedURLException e) {
+			Log.d(TAG, "URL fail: " + item.getLink().toString());
+			Toast.makeText(getActivity(), "Article can't be loaded",
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		if (content == null || content.length() < 10) {
+			intent = new Intent(Intent.ACTION_VIEW, uri);
+			startActivity(intent);
 		} else {
 			intent = new Intent(getSherlockActivity(), ItemDetailActivity.class);
 			intent.putExtra(ItemTable._ID, id);
@@ -268,7 +280,7 @@ public class ItemListFragment extends SherlockListFragment implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		FeedTable feedtable = new FeedTable(getActivity());
 		Feed feed;
-		
+
 		Log.d(TAG, "onOptionsItemSelected: " + item.getTitle() + ", " + mFeedId);
 
 		int itemId = item.getItemId();
@@ -288,7 +300,8 @@ public class ItemListFragment extends SherlockListFragment implements
 			Bundle b = new Bundle();
 			if (mFeedId == -1) {
 				b.putString("title", "Favorites");
-				b.putString("desc", "A summary of the news items that have been marked as favorites.");
+				b.putString("desc",
+						"A summary of the news items that have been marked as favorites.");
 			} else {
 				feed = feedtable.getFeed(mFeedId);
 				b.putString("title", feed.getTitle());

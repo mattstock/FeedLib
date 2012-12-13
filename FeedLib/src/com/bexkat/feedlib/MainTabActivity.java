@@ -60,7 +60,7 @@ public class MainTabActivity extends SherlockFragmentActivity implements Indicat
 			Log.d(TAG, "HTTP cache not available");
 		}
 
-		prefs = getPreferences(MODE_PRIVATE);
+		prefs = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 		
 		FragmentStatePagerAdapter adapter = new FeedPagerAdapter(getSupportFragmentManager());
         pager = (ViewPager)findViewById(R.id.pager);

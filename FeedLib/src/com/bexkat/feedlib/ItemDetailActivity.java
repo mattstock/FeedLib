@@ -18,6 +18,7 @@
 package com.bexkat.feedlib;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,8 +26,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.bexkat.feedlib.db.Enclosure;
+import com.bexkat.feedlib.db.EnclosureTable;
 import com.bexkat.feedlib.db.Item;
 import com.bexkat.feedlib.db.ItemTable;
 
@@ -44,8 +48,10 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 		long id = intent.getLongExtra(ItemTable._ID, 0);
 
 		ItemTable table = new ItemTable(this);
+		EnclosureTable et = new EnclosureTable(this);
 		Item item = table.getItem(id);
-
+		List<Enclosure> encs = et.getEnclosures(item);
+		
 		b.putString("title", item.getTitle());
 		b.putString("pubDate", item.getPubdate().toString());
 		b.putString("content", item.getContent());
@@ -54,7 +60,13 @@ public class ItemDetailActivity extends SherlockFragmentActivity {
 		try {
 			b.putString("uri", item.getLink().toURI().toString());
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			try {
+				b.putString("uri", encs.get(0).getURL().toURI().toString());
+			} catch (URISyntaxException e1) {
+				Toast.makeText(this, "Article can't be loaded",
+						Toast.LENGTH_SHORT).show();
+				finish();
+			}
 		}
 
 		Fragment f = getSupportFragmentManager().findFragmentById(

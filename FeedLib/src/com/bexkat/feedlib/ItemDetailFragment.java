@@ -57,7 +57,8 @@ public class ItemDetailFragment extends SherlockFragment {
 		tv.setText(b.getString("title"));
 		fav = b.getBoolean("fav");
 		title = b.getString("title");
-		uri = Uri.parse(b.getString("uri"));
+		if (b.getString("uri") != null)
+			uri = Uri.parse(b.getString("uri"));
 		id = b.getLong("id");
 		favIcon = (ImageView) view.findViewById(R.id.status);
 		favIcon.setVisibility(fav ? View.VISIBLE : View.INVISIBLE );
