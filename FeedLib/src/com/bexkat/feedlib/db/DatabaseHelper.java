@@ -117,6 +117,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 					feed.setType(parser.getAttributeValue(null, "type"));
 					feed.setDescription(parser.getAttributeValue(null, "text"));
 					feed.setEnabled(ON);
+					if (parser.getAttributeBooleanValue(null, "enabled", true)) {
+						feed.setEnabled(ON);
+					} else {
+						feed.setEnabled(OFF);
+					}
 					feeds.add(feed);
 				}
 			}
